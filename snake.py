@@ -23,15 +23,29 @@ class Apple:
         return self.location
 
 class Game:
-    def __init__(self):
-        self.board = []
+    def __init__(self, height, width):
         self.points = 0
+        self.height = height
+        self.width = width
+        self.board = [[None for i in range(width)] for j in range(height)]
 
-    def initialize_board(self, height, width):
-        # TODO
-        return self.board
+    def render(self):
+        def print_boundaries(width):
+            print("+", end="")
+            print("-" * width, end="")
+            print("+")
 
-    def render_board():
-        # TODO
-        return
+        print_boundaries(self.width)
+        for i in range(self.height):
+            print("|", end="")
+            for j in range(self.width):
+                if self.board[i][j] is not None:
+                    print(self.board[i][j], end="")
+                else:
+                    print(" ", end="")
+            print("|")
+        print_boundaries(self.width)
         
+
+game = Game(20, 20)
+game.render()
