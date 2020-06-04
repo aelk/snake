@@ -20,6 +20,21 @@ class Snake:
     def set_direction(self, direction):
         self.direction= direction
 
+    def move(self, direction):
+        wsadMap = {
+            'w': UP,
+            's': DOWN,
+            'a': LEFT,
+            'd': RIGHT
+        }
+        head_x, head_y = self.head()
+        x, y = wsadMap[direction.lower()]
+        print("x =", x)
+        print("y =", y)
+        new_position = [(head_x + x, head_y + y)]
+        print("new pos=", new_position)
+        self.take_step(new_position)
+
 class Apple:
     def __init__(self, location):
         self.location = location
@@ -59,7 +74,26 @@ class Game:
                     print(" ", end="")
             print("|")
         print_boundaries(self.width)
-        
 
-game = Game(20, 20)
-game.render()
+    def is_valid_move(self, move):
+        move = str(move)
+        return move is not None and len(move) == 1 and move in 'WwSsAaDd'
+    
+    def play(self):
+        self.render()
+        player_move = None
+        while True:
+            previous_move = player_move
+            player_move = str(input("Make a move (WSAD): "))
+            if self.is_valid_move(player_move):
+                self.snake.move(player_move)
+            elif self.is_valid_move(previous_move):
+                self.snake.move(previous_move)
+            else:
+                print("Invalid move. Exiting...")
+                break
+            self.render()
+
+if __name__ == '__main__':
+    game = Game(20, 20)
+    game.play()
