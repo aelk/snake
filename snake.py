@@ -1,3 +1,5 @@
+import os
+
 UP = (0, 1)
 DOWN = (0, -1)
 LEFT = (-1, 0)
@@ -18,7 +20,7 @@ class Snake:
         return self.body[-1]
 
     def set_direction(self, direction):
-        self.direction= direction
+        self.direction = direction
 
     def move(self, direction):
         wsadMap = {
@@ -31,7 +33,7 @@ class Snake:
         x, y = wsadMap[direction.lower()]
         print("x =", x)
         print("y =", y)
-        new_position = [(head_x + x, head_y + y)]
+        new_position = [(head_x - y, head_y + x)]
         print("new pos=", new_position)
         self.take_step(new_position)
 
@@ -92,6 +94,7 @@ class Game:
             else:
                 print("Invalid move. Exiting...")
                 break
+            os.system('clear')
             self.render()
 
 if __name__ == '__main__':
