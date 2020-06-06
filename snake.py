@@ -22,7 +22,7 @@ class Snake:
     def set_direction(self, direction):
         self.direction = direction
 
-    def move(self, direction):
+    def get_new_head_position(self, direction):
         wsadMap = {
             'w': UP,
             's': DOWN,
@@ -31,11 +31,7 @@ class Snake:
         }
         head_x, head_y = self.head()
         x, y = wsadMap[direction.lower()]
-        print("x =", x)
-        print("y =", y)
-        new_position = [(head_x - y, head_y + x)]
-        print("new pos=", new_position)
-        self.take_step(new_position)
+        return (head_x - y, head_y + x)
 
 class Apple:
     def __init__(self, location):
@@ -77,26 +73,49 @@ class Game:
             print("|")
         print_boundaries(self.width)
 
-    def is_valid_move(self, move):
+    def is_illegal_move(self, move):
         move = str(move)
-        return move is not None and len(move) == 1 and move in 'WwSsAaDd'
+        if move is None or len(move) != 1 or move not in 'WwSsAaDd':
+            print("Illegal move. Exiting...")
+            return True
+        return False
+
+    def is_self_collision(self, new_pos):
+        if new_pos in self.snake.get_body()[:-1]:
+            print("Ouch! You ran into yourself. Exiting...")
+            return True
+        return False
     
+    def is_border_collision(self, move, new_pos):
+        x, y = new_pos
+        if x < 0 or x >= self.height or y < 0 or y >= self.width:
+            print("Hit the border. Exiting...")
+            return True
+        return False
+
+    def make_move(self, move):
+        if self.is_illegal_move(move):
+            return False
+
+        new_head_pos = self.snake.get_new_head_position(move)
+        if self.is_self_collision(new_head_pos) or \
+            self.is_border_collision(move, new_head_pos):
+            return False
+
+        self.snake.take_step([new_head_pos])
+        return True
+
     def play(self):
         self.render()
-        player_move = None
         while True:
-            previous_move = player_move
-            player_move = str(input("Make a move (WSAD): "))
-            if self.is_valid_move(player_move):
-                self.snake.move(player_move)
-            elif self.is_valid_move(previous_move):
-                self.snake.move(previous_move)
-            else:
-                print("Invalid move. Exiting...")
+            move = str(input("Make a move (WSAD): "))
+            move_result = self.make_move(move)
+            if move_result is False:
                 break
+
             os.system('clear')
             self.render()
 
 if __name__ == '__main__':
-    game = Game(20, 20)
+    game = Game(10, 30)
     game.play()
