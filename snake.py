@@ -1,9 +1,11 @@
 import os
+import random
 
 UP = (0, 1)
 DOWN = (0, -1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
+APPLE_SYMBOL = '&'
 
 class Snake:
     def __init__(self, position, direction):
@@ -22,27 +24,38 @@ class Snake:
     def set_direction(self, direction):
         self.direction = direction
 
-    def get_new_head_position(self, direction):
+    def move_to_direction(self, move):
         wsadMap = {
             'w': UP,
             's': DOWN,
             'a': LEFT,
             'd': RIGHT
         }
+        return wsadMap[move.lower()]
+
+    def get_new_head_position(self, move):
         head_x, head_y = self.head()
-        x, y = wsadMap[direction.lower()]
+        x, y = self.move_to_direction(move)
         return (head_x - y, head_y + x)
 
+    def extend(self, move):
+        new_head_x, new_head_y = self.get_new_head_position(move)
+        x, y = self.move_to_direction(move)
+        self.body = [(new_head_x - y, new_head_y + x)] + self.body
+
 class Apple:
-    def __init__(self, location):
-        self.location = location
+    def __init__(self, board_height, board_width):
+        self.location = self.get_random_apple(board_height, board_width)
+
+    def get_random_apple(self, height, width):
+        return (random.randint(0, height - 1), random.randint(0, width - 1))
 
     def get_location(self):
         return self.location
 
 class Game:
     def __init__(self, height, width):
-        self.points = 0
+        self.score = 0
         self.height = height
         self.width = width
         self.board = [[None for i in range(width)] for j in range(height)]
@@ -60,6 +73,9 @@ class Game:
         for i in range(self.height):
             print("|", end="")
             for j in range(self.width):
+                if self.board[i][j] is not None:
+                    print(self.board[i][j], end="")
+                    continue
                 empty_cell = True
                 for k in range(len(snake_body)):
                     if (i, j) == snake_body[k]:
@@ -72,6 +88,7 @@ class Game:
                     print(" ", end="")
             print("|")
         print_boundaries(self.width)
+        print("Score:", self.score)
 
     def is_illegal_move(self, move):
         move = str(move)
@@ -102,10 +119,23 @@ class Game:
             self.is_border_collision(move, new_head_pos):
             return False
 
+        x, y = new_head_pos
+        if self.board[x][y] == APPLE_SYMBOL:
+            self.board[x][y] = None
+            self.snake.extend(move)
+            self.place_apple()
+            self.score += 1
+
         self.snake.take_step([new_head_pos])
         return True
 
+    def place_apple(self):
+        self.apple = Apple(self.height, self.width)
+        apple_x, apple_y = self.apple.get_location()
+        self.board[apple_x][apple_y] = APPLE_SYMBOL
+
     def play(self):
+        self.place_apple()
         self.render()
         while True:
             move = str(input("Make a move (WSAD): "))
